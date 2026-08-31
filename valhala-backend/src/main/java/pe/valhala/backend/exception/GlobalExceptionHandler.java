@@ -11,10 +11,14 @@ import java.util.NoSuchElementException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(ColisionReservaException.class)
-    public ResponseEntity<Map<String, Object>> colision(ColisionReservaException e) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("timestamp", LocalDateTime.now(), "status", 409, "error", e.getMessage()));
-    }
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+public ResponseEntity<Map<String, Object>> duplicado(org.springframework.dao.DataIntegrityViolationException e) {
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
+        "timestamp", LocalDateTime.now(),
+        "status", 409,
+        "error", "Registro duplicado: ya existe un dato con ese código único (restricción UNIQUE)."
+    ));
+}
     @ExceptionHandler(DocumentoVencidoException.class)
     public ResponseEntity<Map<String, Object>> docVencido(DocumentoVencidoException e) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("timestamp", LocalDateTime.now(), "status", 403, "error", e.getMessage()));
