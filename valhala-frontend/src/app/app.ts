@@ -18,7 +18,7 @@ import { TransComponent } from './trans.component';
       <p class="sub">Sistema Web B2B | Control de Flota</p>
       <input [(ngModel)]="email" placeholder="Correo corporativo" />
       <input [(ngModel)]="password" type="password" placeholder="Contraseña" (keyup.enter)="entrar()" />
-      <button class="btn-primary" (click)="entrar()">Ingresar al Portal</button>
+      <button class="btn-primary" [disabled]="logueando" (click)="entrar()">{{ logueando ? '⏳ Ingresando…' : 'Ingresar al Portal' }}</button>
       <p class="err" *ngIf="error">{{ error }}</p>
       <div class="hint">
         <b>Demo:</b><br>
@@ -83,7 +83,7 @@ import { TransComponent } from './trans.component';
         </div>
       </section>
 
-      <!-- EQUIPOS (ESTILO FERREYROS: TARJETAS) -->
+      <!-- EQUIPOS -->
       <section *ngIf="view==='equipos'" class="pad">
         <div class="toolbar">
           <input class="search" [(ngModel)]="q" placeholder="🔍 Buscar por código, marca o modelo..." />
@@ -218,12 +218,14 @@ import { TransComponent } from './trans.component';
     </main>
   </div>
 
-  <!-- MODAL GENÉRICO -->
+  <!-- TOAST -->
+  <div class="toast" *ngIf="toast" [class.ok]="toastOk" [class.bad]="!toastOk">{{ toast }}</div>
+
+  <!-- MODAL -->
   <div class="modal-bg" *ngIf="modal" (click)="modal=false">
     <div class="modal" (click)="$event.stopPropagation()">
       <h2>{{ modalTitle }}</h2>
 
-      <!-- FORM EQUIPO -->
       <div *ngIf="modalType==='equipo'">
         <label>Código Patrimonial <input [(ngModel)]="fEq.codigoPatrimonial" /></label>
         <label>Marca <input [(ngModel)]="fEq.marca" /></label>
@@ -237,7 +239,6 @@ import { TransComponent } from './trans.component';
         </label>
       </div>
 
-      <!-- FORM CLIENTE -->
       <div *ngIf="modalType==='cliente'">
         <label>RUC <input [(ngModel)]="fCli.ruc" /></label>
         <label>Razón Social <input [(ngModel)]="fCli.razonSocial" /></label>
@@ -246,7 +247,6 @@ import { TransComponent } from './trans.component';
         <label>Email <input [(ngModel)]="fCli.emailContacto" /></label>
       </div>
 
-      <!-- FORM USUARIO -->
       <div *ngIf="modalType==='usuario'">
         <label>DNI <input [(ngModel)]="fUsr.dni" /></label>
         <label>Nombres <input [(ngModel)]="fUsr.nombres" /></label>
@@ -262,7 +262,6 @@ import { TransComponent } from './trans.component';
         </label>
       </div>
 
-      <!-- FORM CONTRATO -->
       <div *ngIf="modalType==='contrato'">
         <label>Cliente
           <select [(ngModel)]="fCont.idCliente">
@@ -273,14 +272,16 @@ import { TransComponent } from './trans.component';
         <label>Fecha Fin <input type="date" [(ngModel)]="fCont.fechaFin" /></label>
       </div>
 
-      <!-- FORM RESERVA -->
       <div *ngIf="modalType==='reserva'">
-        <label>ID Ítem Contrato <input type="number" [(ngModel)]="fRes.idItemContrato" /></label>
+        <label>Equipo (ítem de contrato)
+          <select [(ngModel)]="fRes.idItemContrato">
+            <option *ngFor="let i of items" [ngValue]="i.idItem">{{ i.equipo?.codigoPatrimonial }} — {{ i.equipo?.marca }} {{ i.equipo?.modelo }} (Contrato #{{ i.contrato?.idContrato }})</option>
+          </select>
+        </label>
         <label>Fecha Inicio <input type="date" [(ngModel)]="fRes.fechaInicio" /></label>
         <label>Fecha Fin <input type="date" [(ngModel)]="fRes.fechaFin" /></label>
       </div>
 
-      <!-- FORM MANTENIMIENTO -->
       <div *ngIf="modalType==='mantenimiento'">
         <label>Equipo
           <select [(ngModel)]="fMan.idEquipo">
@@ -292,7 +293,6 @@ import { TransComponent } from './trans.component';
         <label>Costo (S/) <input type="number" [(ngModel)]="fMan.costoReparacion" /></label>
       </div>
 
-      <!-- FORM DOCUMENTO -->
       <div *ngIf="modalType==='documento'">
         <label>Equipo
           <select [(ngModel)]="fDoc.idEquipo">
@@ -310,7 +310,7 @@ import { TransComponent } from './trans.component';
 
       <div class="modal-actions">
         <button class="btn-cancel" (click)="modal=false">Cancelar</button>
-        <button class="btn-ok" (click)="guardar()">💾 Guardar</button>
+        <button class="btn-ok" [disabled]="guardando" (click)="guardar()">{{ guardando ? '⏳ Guardando…' : '💾 Guardar' }}</button>
       </div>
     </div>
   </div>
@@ -330,6 +330,7 @@ import { TransComponent } from './trans.component';
     .btn-primary { width:100%; padding:12px; border:0; border-radius:8px; cursor:pointer;
       background:linear-gradient(90deg,#0f2f4f,#0f766e); color:#fff; font-weight:700; font-size:14px; margin-top:8px; }
     .btn-primary:hover { filter:brightness(1.15); }
+    .btn-primary:disabled { background:#94a3b8; cursor:not-allowed; }
     .err { color:#dc2626; font-size:13px; margin-top:8px; }
     .hint { margin-top:16px; font-size:11px; color:#94a3b8; text-align:left; line-height:1.5; }
 
@@ -371,11 +372,11 @@ import { TransComponent } from './trans.component';
     .search { flex:1; padding:10px 14px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px; background:#fff; }
     .btn-ok { padding:10px 18px; background:#0f766e; color:#fff; border:0; border-radius:8px; cursor:pointer; font-weight:600; font-size:13px; }
     .btn-ok:hover { background:#0a5f58; }
+    .btn-ok:disabled { background:#94a3b8; cursor:not-allowed; }
     .btn-edit { background:#0ea5e9; color:#fff; border:0; padding:6px 10px; border-radius:6px; cursor:pointer; font-size:12px; }
     .btn-del { background:#dc2626; color:#fff; border:0; padding:6px 10px; border-radius:6px; cursor:pointer; font-size:12px; }
     .btn-cancel { padding:10px 18px; background:#e2e8f0; color:#334155; border:0; border-radius:8px; cursor:pointer; font-weight:600; }
 
-    /* FERREYROS STYLE: TARJETAS DE MAQUINARIA */
     .grid-maq { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px; }
     .maq { background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 2px 10px rgba(15,47,79,.1); transition:transform .2s, box-shadow .2s; border:1px solid #e2e8f0; }
     .maq:hover { transform:translateY(-4px); box-shadow:0 10px 25px rgba(15,47,79,.15); }
@@ -388,7 +389,6 @@ import { TransComponent } from './trans.component';
     .maq-row b { color:#0f2f4f; }
     .maq-foot { padding:10px 16px; background:#f8fafc; border-top:1px solid #e2e8f0; display:flex; gap:8px; justify-content:flex-end; }
 
-    /* GANTT */
     .ghead, .grow { display:flex; align-items:center; margin:6px 0; }
     .glabel { width:90px; font-weight:700; font-size:12px; color:#0f2f4f; }
     .gmonths { display:flex; flex:1; font-size:10px; color:#64748b; font-weight:700; text-transform:uppercase; }
@@ -400,7 +400,6 @@ import { TransComponent } from './trans.component';
     .gbar.pend { background:linear-gradient(90deg,#f59e0b,#d97706); }
     .gbar.anul { background:#94a3b8; text-decoration:line-through; }
 
-    /* TABLAS */
     table.t { width:100%; border-collapse:collapse; font-size:13px; }
     table.t.full { width:100%; }
     table.t th { background:#0f2f4f; color:#fff; text-align:left; padding:10px 12px; font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.5px; }
@@ -411,7 +410,6 @@ import { TransComponent } from './trans.component';
     .badge.ok { background:#dcfce7; color:#15803d; }
     .badge.warn { background:#fef3c7; color:#b45309; }
 
-    /* MODAL */
     .modal-bg { position:fixed; inset:0; background:rgba(15,47,79,.6); display:flex; align-items:center; justify-content:center; z-index:100; backdrop-filter:blur(4px); }
     .modal { background:#fff; border-radius:12px; padding:26px; width:440px; max-height:85vh; overflow-y:auto; box-shadow:0 25px 60px rgba(0,0,0,.35); }
     .modal h2 { margin:0 0 18px; color:#0f2f4f; font-size:18px; }
@@ -421,17 +419,24 @@ import { TransComponent } from './trans.component';
     .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
 
     footer { text-align:center; color:#94a3b8; font-size:11px; padding:30px; }
+
+    .toast { position:fixed; bottom:24px; right:24px; z-index:200; padding:12px 20px; border-radius:10px; color:#fff; font-weight:600; font-size:13px; box-shadow:0 10px 30px rgba(0,0,0,.3); animation:slideIn .3s ease-out; }
+    .toast.ok { background:#16a34a; }
+    .toast.bad { background:#dc2626; }
+    @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
   `]
 })
 export class App implements OnInit {
-  email = ''; password = ''; error = '';
+  email = ''; password = ''; error = ''; logueando = false;
   view = 'dash';
   modal = false; modalType = ''; modalTitle = '';
 
   equipos: any[] = []; categorias: any[] = []; clientes: any[] = [];
   usuarios: any[] = []; contratos: any[] = []; reservas: any[] = [];
   liq: any[] = []; documentos: any[] = []; mantenimientos: any[] = [];
+  items: any[] = [];
   q = '';
+  toast = ''; toastOk = true; guardando = false;
 
   fEq: any = {}; fCli: any = {}; fUsr: any = {}; fCont: any = {}; fRes: any = {}; fMan: any = {}; fDoc: any = {};
   editEqId: number | null = null;
@@ -442,10 +447,16 @@ export class App implements OnInit {
 
   puede(roles: string[]) { return roles.includes(this.auth.rol); }
 
+  mostrarToast(msg: string, ok = true) {
+    this.toast = msg; this.toastOk = ok;
+    setTimeout(() => (this.toast = ''), 3500);
+  }
+
   entrar() {
+    this.logueando = true;
     this.auth.login(this.email, this.password).subscribe({
-      next: (r) => { this.auth.setSession(r); this.error = ''; this.cargarTodo(); },
-      error: () => (this.error = 'Credenciales inválidas')
+      next: (r) => { this.logueando = false; this.auth.setSession(r); this.error = ''; this.cargarTodo(); },
+      error: () => { this.logueando = false; this.error = 'Credenciales inválidas'; }
     });
   }
 
@@ -455,7 +466,7 @@ export class App implements OnInit {
     this.cargarEquipos(); this.cargarGantt(); this.cargarLiq();
     this.cargarCli(); this.cargarCont();
     if (this.auth.rol === 'ADMIN') this.cargarUsr();
-    this.cargarMan(); this.cargarDoc();
+    this.cargarMan(); this.cargarDoc(); this.cargarItems();
     this.api.categorias().subscribe((c) => (this.categorias = c));
   }
 
@@ -467,6 +478,7 @@ export class App implements OnInit {
   cargarUsr() { this.api.usuarios().subscribe({ next: (r) => (this.usuarios = r), error: () => {} }); }
   cargarMan() { this.api.mantenimientos().subscribe((r) => (this.mantenimientos = r)); }
   cargarDoc() { this.api.documentos().subscribe((r) => (this.documentos = r)); }
+  cargarItems() { this.api.items().subscribe({ next: (r) => (this.items = r), error: () => (this.items = []) }); }
 
   tituloView() {
     const m: any = { dash:'📊 Dashboard Ejecutivo', equipos:'🚜 Flota de Maquinaria', gantt:'📅 Reservas (Gantt)', liquidaciones:'💰 Liquidaciones Financieras', clientes:'🏢 Clientes Corporativos', contratos:'📜 Contratos', usuarios:'👥 Usuarios del Sistema', mantenimientos:'🔧 Mantenimientos de Taller', documentos:'📋 Documentos Legales' };
@@ -487,10 +499,15 @@ export class App implements OnInit {
     return { left, width };
   }
 
-  // === CRUD EQUIPOS ===
   abrirFormEq() { this.editEqId = null; this.fEq = { anioFabricacion: 2024, horometroAcumulado: 0 }; this.modalType='equipo'; this.modalTitle='Nuevo Equipo'; this.modal=true; }
   editarEq(e: any) { this.editEqId = e.idEquipo; this.fEq = { idCategoria: e.categoria?.idCategoria, codigoPatrimonial: e.codigoPatrimonial, marca: e.marca, modelo: e.modelo, anioFabricacion: e.anioFabricacion, horometroAcumulado: e.horometroAcumulado }; this.modalType='equipo'; this.modalTitle='Editar Equipo'; this.modal=true; }
-  borrarEq(e: any) { if (confirm('¿Eliminar ' + e.codigoPatrimonial + '?')) this.api.eliminarEquipo(e.idEquipo).subscribe(() => this.cargarEquipos()); }
+  borrarEq(e: any) {
+    if (confirm('¿Eliminar ' + e.codigoPatrimonial + '?'))
+      this.api.eliminarEquipo(e.idEquipo).subscribe({
+        next: () => { this.equipos = this.equipos.filter(x => x.idEquipo !== e.idEquipo); this.mostrarToast('🗑️ Equipo eliminado'); },
+        error: () => this.mostrarToast('No se pudo eliminar (¿tiene reservas asociadas?)', false)
+      });
+  }
 
   abrirFormCli() { this.fCli = {}; this.modalType='cliente'; this.modalTitle='Nuevo Cliente'; this.modal=true; }
   abrirFormUsr() { this.fUsr = { idRol: 1 }; this.modalType='usuario'; this.modalTitle='Nuevo Usuario'; this.modal=true; }
@@ -500,15 +517,17 @@ export class App implements OnInit {
   abrirFormDoc() { this.fDoc = { tipoPoliza: 'SOAT' }; this.modalType='documento'; this.modalTitle='Registrar Documento'; this.modal=true; }
 
   guardar() {
-    const done = () => { this.modal = false; this.cargarTodo(); };
+    this.guardando = true;
+    const done = (msg: string, reload: () => void) => { this.guardando = false; this.modal = false; this.mostrarToast(msg); reload(); };
+    const fail = (e: any, def: string) => { this.guardando = false; this.mostrarToast(e?.error?.error || def, false); };
     if (this.modalType === 'equipo') {
       const op = this.editEqId ? this.api.actualizarEquipo(this.editEqId, this.fEq) : this.api.crearEquipo(this.fEq);
-      op.subscribe({ next: done, error: (e) => alert('Error: ' + (e.error?.error || e.message)) });
-    } else if (this.modalType === 'cliente') this.api.crearCliente(this.fCli).subscribe({ next: done, error: (e) => alert('Error: ' + (e.error?.error || e.message)) });
-    else if (this.modalType === 'usuario') this.api.crearUsuario(this.fUsr).subscribe({ next: done, error: (e) => alert('Error: ' + (e.error?.error || e.message)) });
-    else if (this.modalType === 'contrato') this.api.crearContrato(this.fCont).subscribe({ next: done, error: (e) => alert('Error: ' + (e.error?.error || e.message)) });
-    else if (this.modalType === 'reserva') this.api.crearReserva(this.fRes).subscribe({ next: done, error: (e) => alert(e.error?.error || 'Colisión de fechas (RF-01)') });
-    else if (this.modalType === 'mantenimiento') this.api.crearMantenimiento(this.fMan).subscribe({ next: done, error: (e) => alert('Error: ' + (e.error?.error || e.message)) });
-    else if (this.modalType === 'documento') this.api.crearDocumento(this.fDoc).subscribe({ next: done, error: (e) => alert('Error: ' + (e.error?.error || e.message)) });
+      op.subscribe({ next: () => done('✅ Equipo guardado', () => this.cargarEquipos()), error: (e) => fail(e, 'Error al guardar equipo') });
+    } else if (this.modalType === 'cliente') this.api.crearCliente(this.fCli).subscribe({ next: () => done('✅ Cliente registrado', () => this.cargarCli()), error: (e) => fail(e, 'Error al registrar cliente') });
+    else if (this.modalType === 'usuario') this.api.crearUsuario(this.fUsr).subscribe({ next: () => done('✅ Usuario creado', () => this.cargarUsr()), error: (e) => fail(e, 'Error al crear usuario') });
+    else if (this.modalType === 'contrato') this.api.crearContrato(this.fCont).subscribe({ next: () => done('✅ Contrato creado', () => { this.cargarCont(); this.cargarItems(); }), error: (e) => fail(e, 'Error al crear contrato') });
+    else if (this.modalType === 'reserva') this.api.crearReserva(this.fRes).subscribe({ next: () => done('✅ Reserva creada', () => this.cargarGantt()), error: (e) => fail(e, 'Colisión de fechas (RF-01)') });
+    else if (this.modalType === 'mantenimiento') this.api.crearMantenimiento(this.fMan).subscribe({ next: () => done('✅ Mantenimiento registrado', () => this.cargarMan()), error: (e) => fail(e, 'Error al registrar mantenimiento') });
+    else if (this.modalType === 'documento') this.api.crearDocumento(this.fDoc).subscribe({ next: () => done('✅ Documento registrado', () => this.cargarDoc()), error: (e) => fail(e, 'Error al registrar documento') });
   }
 }

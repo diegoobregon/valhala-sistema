@@ -17,6 +17,7 @@ export class ApiService {
   documentos(): Observable<any[]> { return this.http.get<any[]>(this.base + '/documentos'); }
   mantenimientos(): Observable<any[]> { return this.http.get<any[]>(this.base + '/mantenimientos'); }
   salidas(): Observable<any[]> { return this.http.get<any[]>(this.base + '/transacciones/checkout'); }
+  items(): Observable<any[]> { return this.http.get<any[]>(this.base + '/items'); }
 
   crearEquipo(d: any): Observable<any> { return this.http.post(this.base + '/equipos', d); }
   actualizarEquipo(id: number, d: any): Observable<any> { return this.http.put(this.base + '/equipos/' + id, d); }

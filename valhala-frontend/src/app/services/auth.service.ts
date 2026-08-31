@@ -6,7 +6,7 @@ export interface LoginResponse { token: string; rol: string; nombres: string; }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private base = 'http://localhost:8080/api/v1';
+  private base = 'http://127.0.0.1:8080/api/v1';
   constructor(private http: HttpClient) {}
 
   login(email: string, password: string): Observable<LoginResponse> {
