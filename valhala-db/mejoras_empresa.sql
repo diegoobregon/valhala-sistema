@@ -1,4 +1,4 @@
-﻿-- MEJORAS ACORDE A LA EMPRESA REAL (contrato + documentos reales)
+-- MEJORAS ACORDE A LA EMPRESA REAL (contrato + documentos reales)
 
 -- Cláusula SEGUNDA: destino/obra del contrato
 ALTER TABLE contratos ADD COLUMN IF NOT EXISTS obra_destino VARCHAR(255);
