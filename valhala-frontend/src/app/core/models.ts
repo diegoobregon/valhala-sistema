@@ -1,5 +1,14 @@
 export interface LoginRequest  { email: string; password: string; }
-export interface LoginResponse { token: string; rol: string; nombres: string; }
+export interface LoginResponse { token: string; rol: string; nombres: string; empresa?: string; }
+
+export interface RegistroRequest {
+  ruc: string; razonSocial: string; emailContacto: string; password: string;
+  nombresAdmin: string; apellidosAdmin: string; dniAdmin: string;
+}
+export interface RegistroResponse { mensaje: string; empresaId: number; email: string; }
+
+export interface VerificarRequest { email: string; codigo: string; }
+export interface VerificarResponse { verificado: boolean; mensaje: string; }
 
 export interface Categoria { idCategoria: number; nombreCategoria: string; descripcion?: string; }
 

@@ -7,6 +7,7 @@ import { LoginRequest, LoginResponse } from './models';
 const K_TOKEN = 'valhala_token';
 const K_ROL   = 'valhala_rol';
 const K_NOM   = 'valhala_nombres';
+const K_EMP   = 'valhala_empresa';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -15,6 +16,7 @@ export class AuthService {
 
   rol     = signal<string>(localStorage.getItem(K_ROL) ?? '');
   nombres = signal<string>(localStorage.getItem(K_NOM) ?? '');
+  empresa = signal<string>(localStorage.getItem(K_EMP) ?? '');
 
   login(body: LoginRequest) {
     return this.http.post<LoginResponse>('/api/v1/auth/login', body).pipe(
@@ -22,8 +24,10 @@ export class AuthService {
         localStorage.setItem(K_TOKEN, r.token);
         localStorage.setItem(K_ROL, r.rol);
         localStorage.setItem(K_NOM, r.nombres);
+        localStorage.setItem(K_EMP, r.empresa ?? '');
         this.rol.set(r.rol);
         this.nombres.set(r.nombres);
+        this.empresa.set(r.empresa ?? '');
       })
     );
   }
@@ -36,6 +40,7 @@ export class AuthService {
     localStorage.clear();
     this.rol.set('');
     this.nombres.set('');
+    this.empresa.set('');
     this.router.navigate(['/login']);
   }
 }

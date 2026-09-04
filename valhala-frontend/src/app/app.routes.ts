@@ -3,6 +3,8 @@ import { authGuard } from './core/auth.guard';
 
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./pages/login.component').then(m => m.LoginComponent) },
+  { path: 'registro', loadComponent: () => import('./pages/registro.component').then(m => m.RegistroComponent) },
+  { path: 'verificar', loadComponent: () => import('./pages/verificar.component').then(m => m.VerificarComponent) },
   {
     path: '',
     loadComponent: () => import('./pages/shell.component').then(m => m.ShellComponent),

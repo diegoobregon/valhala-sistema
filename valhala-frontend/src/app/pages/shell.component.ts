@@ -10,6 +10,9 @@ import { AuthService } from '../core/auth.service';
   <header>
     <h1>VAL<span>HALA</span> <small>Control de Flota B2B</small></h1>
     <div class="user">
+      @if (auth.empresa()) {
+        <span class="empresa-chip">🏢 {{ auth.empresa() }}</span>
+      }
       <span>{{ auth.nombres() }}</span>
       <span class="badge b-am">{{ auth.rol() }}</span>
       <button class="ghost" (click)="auth.logout()">Salir</button>
@@ -28,17 +31,22 @@ import { AuthService } from '../core/auth.service';
 
   <main><router-outlet></router-outlet></main>`,
   styles: [`
-    header{background:#0d1013;border-bottom:3px solid var(--am);padding:14px 26px;
+    header{background:#0d1013;border-bottom:3px solid #f59e0b;padding:14px 26px;
       display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
-    header h1{font-size:17px;letter-spacing:2px}
-    header h1 span{color:var(--am)}
-    header small{font-weight:400;color:var(--mut);letter-spacing:0;margin-left:10px;font-size:12px}
-    .user{display:flex;align-items:center;gap:10px;font-size:13px}
-    nav{display:flex;gap:4px;flex-wrap:wrap;padding:12px 26px;background:#11151a;border-bottom:1px solid var(--bd)}
-    nav a{color:var(--tx);text-decoration:none;padding:8px 14px;border-radius:6px;font-size:13px}
+    header h1{font-size:17px;letter-spacing:2px;color:#fff}
+    header h1 span{color:#f59e0b}
+    header h1 small{font-weight:400;color:#8b949e;letter-spacing:0;margin-left:10px;font-size:12px}
+    .user{display:flex;align-items:center;gap:10px;font-size:13px;color:#c9d1d9}
+    .empresa-chip{background:#3b82f622;color:#3b82f6;padding:4px 10px;border-radius:4px;font-size:12px;font-weight:600;border:1px solid #3b82f644}
+    nav{display:flex;gap:4px;flex-wrap:wrap;padding:12px 26px;background:#11151a;border-bottom:1px solid #30363d}
+    nav a{color:#c9d1d9;text-decoration:none;padding:8px 14px;border-radius:6px;font-size:13px}
     nav a:hover{background:#1c232a}
-    nav a.on{background:var(--am);color:#111;font-weight:700}
+    nav a.on{background:#f59e0b;color:#111;font-weight:700}
     main{max-width:1180px;margin:0 auto;padding:24px}
+    .badge{padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700}
+    .b-am{background:#f59e0b;color:#111}
+    .ghost{background:transparent;border:1px solid #30363d;color:#c9d1d9;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:12px}
+    .ghost:hover{background:#30363d}
   `]
 })
 export class ShellComponent {
