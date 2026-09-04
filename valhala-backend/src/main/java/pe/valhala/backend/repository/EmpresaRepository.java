@@ -4,4 +4,5 @@ import pe.valhala.backend.entity.Empresa;
 import java.util.Optional;
 public interface EmpresaRepository extends JpaRepository<Empresa, Integer> {
     Optional<Empresa> findByRuc(String ruc);
+    Optional<Empresa> findByEmailContacto(String emailContacto);
 }
