@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 public class Equipo {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id_equipo") private Integer idEquipo;
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "id_categoria", nullable = false) private CategoriaLineaAmarrilla categoria;
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "id_empresa") private Empresa empresa;
     @Column(name = "codigo_patrimonial", nullable = false, unique = true, length = 50) private String codigoPatrimonial;
     @Column(nullable = false, length = 50) private String marca;
     @Column(nullable = false, length = 50) private String modelo;

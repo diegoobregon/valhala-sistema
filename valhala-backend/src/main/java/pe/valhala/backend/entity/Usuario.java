@@ -3,7 +3,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
-
 @Entity
 @Table(name = "usuarios")
 @Data @NoArgsConstructor @AllArgsConstructor
@@ -17,4 +16,5 @@ public class Usuario {
     @Column(nullable = false, unique = true, length = 120) private String email;
     @JsonIgnore @Column(name = "password_hash", nullable = false) private String passwordHash;
     @Column(name = "estado_activo", nullable = false) private Boolean estadoActivo = true;
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "id_empresa") private Empresa empresa;
 }
